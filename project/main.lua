@@ -116,13 +116,16 @@ function rnd()
 end
 
 local screenShotFromLastState
+local scrn
 
-local function saveScreenShotFromLastState()
-  local scrn = love.graphics.newScreenshot()
+local myCallbackFunc = function ( imgData )
+	scrn = love.graphics.newImage(imgData)
+	-- do whatever you want with the image
+
 	local canvas = love.graphics.newCanvas(GAME_WIDTH,GAME_HEIGHT) -- make a canvas that is the proper dimensions
 	canvas:renderTo(function()
 		love.graphics.setColor(255,255,255,255) -- set colour to white, i.e. draw normally
-		love.graphics.draw(love.graphics.newImage(scrn),0,0, -- draw the screenshot at 0,0
+		love.graphics.draw(love.graphics.newImage(imgData),0,0, -- draw the screenshot at 0,0
 		0, -- 0 rotation
 		canvas:getWidth() / love.graphics.getWidth(), -- x scale
 		canvas:getHeight() / love.graphics.getHeight() -- y scale
@@ -130,6 +133,15 @@ local function saveScreenShotFromLastState()
   end)
   -- this resizes the canvas get's it's data and put's in an image
   screenShotFromLastState = love.graphics.newImage(canvas:newImageData())
+  end
+
+local function saveScreenShotFromLastState()
+
+
+
+  love.graphics.captureScreenshot(myCallbackFunc)
+
+
 end
 
 function drawLastStateScreenshot()
@@ -196,8 +208,8 @@ end
 local function recursiveRequire(folder, tree)
   local tree = tree or {}
   for i,file in ipairs(love.filesystem.getDirectoryItems(folder)) do
-      local filename = folder.."/"..file
-      if love.filesystem.isDirectory(filename) then
+	  local filename = folder.."/"..file
+	  if love.filesystem.getInfo(filename, 'directory') then
           recursiveRequire(filename)
       elseif file ~= ".DS_Store" then
           require(filename:gsub(".lua",""))
